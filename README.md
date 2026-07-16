@@ -1,0 +1,2 @@
+# Hinatu
+Hinatu economy bot 
