@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "server.js", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "/server.js" }
+  ],
+  "env": {
+    "ADMIN_PASS": "Pasqua1264",
+    "PAY_BANK": "GTBank",
+    "PAY_NAME": "PASQUA TECH",
+    "PAY_ACCT": "0000000000"
+  }
+}

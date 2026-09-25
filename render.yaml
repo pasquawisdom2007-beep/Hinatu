@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: banx
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ADMIN_PASS
+        value: Pasqua1264        # change this in Render dashboard
+      - key: PAY_BANK
+        value: GTBank
+      - key: PAY_NAME
+        value: PASQUA TECH
+      - key: PAY_ACCT
+        value: "0000000000"      # update with real account number
