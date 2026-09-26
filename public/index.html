@@ -1,0 +1,721 @@
+<!doctype html><html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>BANX — Premium Ban Service</title>
+<style>
+:root{--r:#ff0033;--r2:#aa0022;--r3:rgba(255,0,51,.13);--c:#00ffcc;--bg:#040008;--card:rgba(12,0,6,.95);--bdr:rgba(255,0,51,.3);--txt:#ddd;--dim:#666;--glow:0 0 8px #ff0033,0 0 25px rgba(255,0,51,.4);--cg:0 0 8px #00ffcc,0 0 20px rgba(0,255,204,.3)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;background:var(--bg);color:var(--txt);font-family:'Courier New',monospace;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(255,0,51,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,0,51,.035) 1px,transparent 1px);background-size:44px 44px}
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.12) 2px,rgba(0,0,0,.12) 4px)}
+@keyframes glitch{0%,100%{text-shadow:var(--glow)}20%{transform:translate(-2px,0);text-shadow:-2px 0 #00ffcc,var(--glow)}40%{transform:translate(2px,0);text-shadow:2px 0 #f60,var(--glow)}60%{transform:none}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@keyframes flicker{0%,100%{opacity:1}5%{opacity:.8}10%{opacity:1}15%{opacity:.5}20%{opacity:1}}
+@keyframes scanY{0%{transform:translateY(-100%)}100%{transform:translateY(100vh)}}
+@keyframes liveblink{0%,100%{opacity:1;box-shadow:0 0 6px #00ff66}50%{opacity:.5;box-shadow:none}}
+.page{position:relative;z-index:1;min-height:100vh;display:none;animation:up .35s ease}.page.on{display:block}
+nav{position:fixed;top:env(safe-area-inset-top,0);left:0;right:0;z-index:100;background:rgba(4,0,8,.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--bdr);padding:11px 18px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:22px;font-weight:900;letter-spacing:4px;color:var(--r);text-shadow:var(--glow);animation:flicker 5s infinite;cursor:pointer}
+.nav-links{display:flex;gap:6px}
+.nb{padding:6px 13px;border:1px solid var(--bdr);border-radius:6px;background:transparent;color:var(--txt);font-family:inherit;font-size:11px;cursor:pointer;letter-spacing:1px;transition:.2s}
+.nb:hover,.nb.on{background:var(--r3);color:var(--r);border-color:var(--r);text-shadow:var(--glow)}
+.hero{padding:130px 20px 70px;text-align:center;background:radial-gradient(ellipse at 50% 25%,rgba(255,0,51,.11) 0%,transparent 62%)}
+.badge{display:inline-block;padding:4px 14px;border:1px solid var(--r);border-radius:20px;font-size:10px;letter-spacing:3px;color:var(--r);text-shadow:var(--glow);margin-bottom:22px;animation:pulse 2.2s infinite}
+.h1{font-size:clamp(52px,13vw,110px);font-weight:900;letter-spacing:6px;color:var(--r);text-shadow:var(--glow);animation:glitch 3.5s infinite;line-height:.9;margin-bottom:6px}
+.h2{font-size:clamp(11px,2.5vw,16px);letter-spacing:7px;color:var(--c);margin-bottom:14px;text-shadow:var(--cg)}
+.hdesc{max-width:480px;margin:0 auto 36px;color:var(--dim);font-size:13px;line-height:1.75}
+.price{font-size:clamp(32px,7vw,58px);font-weight:900;color:var(--c);text-shadow:var(--cg);margin-bottom:6px}
+.price span{font-size:.45em;color:var(--dim)}
+.btn{padding:13px 28px;border:none;border-radius:8px;font-family:inherit;font-size:12px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:.2s}
+.btn-r{background:linear-gradient(135deg,var(--r),var(--r2));color:#fff;box-shadow:var(--glow)}
+.btn-r:hover{transform:translateY(-2px);box-shadow:0 0 22px #ff0033,0 0 55px rgba(255,0,51,.5)}
+.btn-o{background:transparent;border:1px solid var(--r);color:var(--r);text-shadow:var(--glow)}
+.btn-o:hover{background:var(--r3)}
+.btn-c{background:linear-gradient(135deg,#00ddaa,#0099dd);color:#000;font-weight:900}
+.btn-g{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--txt)}
+.btn-g:hover{background:rgba(255,255,255,.1)}
+.btn-danger{background:linear-gradient(135deg,#ff4400,#cc0000);color:#fff}
+.btn-ok{background:linear-gradient(135deg,#00cc66,#008844);color:#fff}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.w100{width:100%}
+.fab{position:fixed;bottom:calc(28px + env(safe-area-inset-bottom,0));right:22px;z-index:200;width:56px;height:56px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--r),var(--r2));color:#fff;font-size:22px;cursor:pointer;box-shadow:var(--glow),0 8px 24px rgba(0,0,0,.5);animation:pulse 2.5s infinite;display:flex;align-items:center;justify-content:center}
+.fab:hover{transform:scale(1.1)}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:22px;backdrop-filter:blur(10px)}
+.glow{box-shadow:0 0 30px rgba(255,0,51,.12),0 8px 32px rgba(0,0,0,.4)}
+.sbar{display:flex;background:var(--bdr);border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr)}
+.sbar-cell{flex:1;padding:18px 10px;text-align:center;background:var(--bg);font-size:11px;letter-spacing:1.5px;color:var(--dim)}
+.sbar-val{font-size:26px;font-weight:900;margin-bottom:4px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;max-width:860px;margin:0 auto}
+.step{padding:22px;border:1px solid var(--bdr);border-radius:12px;text-align:center}
+.sn{font-size:30px;font-weight:900;color:var(--r);text-shadow:var(--glow);margin-bottom:8px}
+.stt{font-size:12px;font-weight:700;letter-spacing:2px;color:var(--c);margin-bottom:8px}
+.sd{font-size:11px;color:var(--dim);line-height:1.65}
+.sec{padding:56px 20px;max-width:860px;margin:0 auto}
+.sec-tag{font-size:10px;letter-spacing:4px;color:var(--r);margin-bottom:6px}
+.sec-head{font-size:clamp(22px,4vw,34px);font-weight:900;color:#fff;margin-bottom:28px}
+.fg{margin-bottom:18px}
+.lbl{display:block;font-size:10px;letter-spacing:2px;color:var(--r);margin-bottom:7px}
+.inp{width:100%;padding:13px 15px;background:rgba(255,255,255,.03);border:1px solid var(--bdr);border-radius:8px;color:var(--txt);font-family:inherit;font-size:13px;transition:.2s}
+.inp:focus{outline:none;border-color:var(--r);box-shadow:var(--glow);background:rgba(255,0,51,.03)}
+.inp::placeholder{color:var(--dim)}
+select.inp{cursor:pointer}
+.bdg{padding:3px 10px;border-radius:16px;font-size:10px;font-weight:700;letter-spacing:1px;white-space:nowrap}
+.b-pay{background:rgba(0,150,255,.12);color:#0096ff;border:1px solid rgba(0,150,255,.3)}
+.b-q{background:rgba(255,170,0,.12);color:#ffaa00;border:1px solid rgba(255,170,0,.3)}
+.b-ban{background:rgba(255,0,51,.12);color:var(--r);border:1px solid var(--bdr);text-shadow:var(--glow)}
+.b-rej{background:rgba(100,100,100,.12);color:#777;border:1px solid rgba(255,255,255,.08)}
+.b-live{background:rgba(0,255,100,.1);color:#00ff66;border:1px solid rgba(0,255,100,.3);animation:liveblink 1.5s infinite}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{padding:9px 10px;text-align:left;font-size:9px;letter-spacing:2px;color:var(--r);border-bottom:1px solid var(--bdr)}
+.tbl td{padding:11px 10px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+.tbl tr:hover td{background:var(--r3)}
+.tabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:3px;margin-bottom:18px}
+.tab{padding:7px 14px;border:1px solid var(--bdr);border-radius:8px;font-family:inherit;font-size:10px;letter-spacing:1px;background:transparent;color:var(--dim);cursor:pointer;white-space:nowrap;transition:.2s}
+.tab.on,.tab:hover{background:var(--r3);color:var(--r);border-color:var(--r)}
+.sp{width:36px;height:36px;border:2px solid var(--bdr);border-top-color:var(--r);border-radius:50%;animation:spin 1s linear infinite}
+.lbox{display:flex;flex-direction:column;align-items:center;gap:14px;padding:40px;color:var(--dim);font-size:10px;letter-spacing:2px}
+/* TOASTS */
+#toast{position:fixed;top:76px;right:18px;z-index:9999;padding:13px 18px;border-radius:10px;font-size:11px;letter-spacing:1px;background:rgba(4,0,8,.97);border:1px solid var(--r);box-shadow:var(--glow);display:none;max-width:300px;animation:up .3s ease;line-height:1.5}
+#toast.on{display:block}
+#toast.ok{border-color:#00ff66;color:#00ff66;box-shadow:0 0 12px rgba(0,255,100,.4)}
+#toast.warn{border-color:#ffaa00;color:#ffaa00;box-shadow:0 0 12px rgba(255,170,0,.35)}
+#toast.er{color:var(--r)}
+/* NOTIFICATION BANNER */
+#notif-banner{position:fixed;top:60px;left:0;right:0;z-index:9998;padding:14px 20px;display:none;align-items:center;justify-content:space-between;gap:12px;animation:up .4s ease}
+#notif-banner.on{display:flex}
+#notif-banner.ok{background:linear-gradient(90deg,rgba(0,255,100,.15),rgba(0,200,80,.08));border-bottom:1px solid rgba(0,255,100,.3);color:#00ff66}
+#notif-banner.ban{background:linear-gradient(90deg,rgba(255,0,51,.18),rgba(180,0,30,.08));border-bottom:1px solid rgba(255,0,51,.4);color:var(--r)}
+.notif-close{background:none;border:none;color:inherit;font-size:18px;cursor:pointer;opacity:.7;padding:0 4px}
+/* STATUS STEPS */
+.sstep{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;font-size:11px;letter-spacing:1px}
+.sstep.done{color:var(--c)}.sstep.act{color:var(--r);background:var(--r3);animation:pulse 1.5s infinite}.sstep.pend{color:var(--dim)}
+.sdot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.sstep.done .sdot{background:var(--c);box-shadow:var(--cg)}.sstep.act .sdot{background:var(--r);box-shadow:var(--glow)}.sstep.pend .sdot{background:var(--dim)}
+.sstep-ts{margin-left:auto;font-size:9px;color:var(--dim);white-space:nowrap}
+/* ID BOX */
+.idbox{padding:14px;background:rgba(0,0,0,.5);border:1px solid var(--r);border-radius:8px;font-size:12px;letter-spacing:2px;color:var(--c);text-align:center;word-break:break-all;text-shadow:var(--cg);cursor:pointer}
+.idbox:hover{background:rgba(255,0,51,.05)}
+/* PAYMENT LINES */
+.pline{padding:11px 14px;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.07);border-radius:8px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;font-size:13px}
+.pline span{color:var(--dim);font-size:10px;letter-spacing:1px}
+/* ADMIN */
+.a-hdr{padding:14px 18px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;background:rgba(12,0,6,.8)}
+.astat{flex:1;text-align:center;padding:14px 8px;border:1px solid var(--bdr);border-radius:12px}
+.astat-v{font-size:26px;font-weight:900}
+.astat-l{font-size:9px;letter-spacing:2px;color:var(--dim);margin-top:3px}
+.act-row{display:flex;gap:5px;flex-wrap:wrap}
+/* MODAL */
+#modal{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.88);display:none;align-items:center;justify-content:center;padding:20px}
+#modal.on{display:flex}
+/* LIVE MONITOR BAR */
+.monitor-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(0,255,100,.05);border:1px solid rgba(0,255,100,.2);border-radius:8px;margin-bottom:14px;font-size:11px}
+.monitor-left{display:flex;align-items:center;gap:8px;color:#00ff66}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#00ff66;animation:liveblink 1.2s infinite}
+/* MISC */
+.empty{text-align:center;padding:48px 20px;color:var(--dim);font-size:11px;letter-spacing:2px}
+.mt{margin-top:14px}.mb{margin-bottom:14px}.flex{display:flex}.fgap{gap:10px}.fw9{font-weight:900}.sm{font-size:11px}.ls{letter-spacing:1.5px}
+.tr{color:var(--r);text-shadow:var(--glow)}.tc{color:var(--c)}.td{color:var(--dim)}
+.scan{position:fixed;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(255,0,51,.6),transparent);z-index:50;pointer-events:none;animation:scanY 4s linear infinite}
+.pay-notif-row{background:rgba(255,170,0,.05);border-left:2px solid #ffaa00}
+@media(max-width:560px){.tbl th:nth-child(3),.tbl td:nth-child(3),.tbl th:nth-child(5),.tbl td:nth-child(5){display:none}}
+</style>
+</head>
+<body>
+<div class="scan"></div>
+
+<!-- NOTIFICATION BANNER -->
+<div id="notif-banner">
+  <span id="notif-msg"></span>
+  <button class="notif-close" onclick="closeBanner()">✕</button>
+</div>
+
+<nav>
+  <div class="logo" onclick="go('home')">BANX</div>
+  <div class="nav-links">
+    <button class="nb" data-p="home" onclick="go('home')">HOME</button>
+    <button class="nb" data-p="user" onclick="go('user')">PORTAL</button>
+    <button class="nb" data-p="admin" onclick="go('admin')">ADMIN</button>
+  </div>
+</nav>
+<div id="toast"></div>
+
+<!-- ══ HOME ══ -->
+<div class="page on" id="p-home">
+  <div class="hero">
+    <div class="badge">⚡ PREMIUM SERVICE ONLINE ⚡</div>
+    <div class="h1">BANX</div>
+    <div class="h2">WHATSAPP BAN SERVICE</div>
+    <p class="hdesc">Professional account termination service. Submit your target, confirm payment, track your ban in real-time.</p>
+    <div class="price">₦1,000 <span>/ BAN</span></div>
+    <p class="td sm ls" style="margin-bottom:30px">PER ACCOUNT TERMINATED</p>
+    <div class="flex fgap" style="justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-r" onclick="go('user')">⚡ INITIATE BAN</button>
+      <button class="btn btn-o" onclick="go('user');st('track')">🔍 TRACK STATUS</button>
+    </div>
+  </div>
+  <div class="sbar">
+    <div class="sbar-cell"><div class="sbar-val tr" id="s-total">—</div>TOTAL BANS</div>
+    <div class="sbar-cell"><div class="sbar-val" style="color:#ffaa00" id="s-pending">—</div>PENDING</div>
+    <div class="sbar-cell"><div class="sbar-val" style="color:#00ff66" id="s-banned">—</div>CONFIRMED</div>
+  </div>
+  <div class="sec">
+    <div class="sec-tag">◈ PROCESS</div>
+    <div class="sec-head">How It Works</div>
+    <div class="steps">
+      <div class="step"><div class="sn">01</div><div class="stt">SUBMIT TARGET</div><div class="sd">Enter the WhatsApp number. Get a unique Request ID instantly.</div></div>
+      <div class="step"><div class="sn">02</div><div class="stt">PAY ₦1,000</div><div class="sd">Transfer to our bank. Use your Request ID as reference.</div></div>
+      <div class="step"><div class="sn">03</div><div class="stt">BAN EXECUTED</div><div class="sd">Admin initiates ban. You get notified the moment it's confirmed.</div></div>
+    </div>
+  </div>
+  <div class="sec" style="padding-top:0">
+    <div class="card" style="border-color:rgba(255,170,0,.25);text-align:center">
+      <div style="font-size:18px;margin-bottom:8px">⚠️</div>
+      <div class="sm ls" style="color:#ffaa00;margin-bottom:8px">DISCLAIMER</div>
+      <p class="td" style="font-size:12px;line-height:1.75">This service reports accounts violating WhatsApp Terms of Service. Misuse is the requester's sole responsibility. No refunds after initiation.</p>
+    </div>
+    <div style="text-align:center;padding:40px 0 20px;color:var(--dim);font-size:10px;letter-spacing:2px">BANX © 2025 — PASQUA TECH</div>
+  </div>
+</div>
+
+<!-- ══ USER PORTAL ══ -->
+<div class="page" id="p-user">
+  <div style="padding:90px 20px 100px;max-width:580px;margin:0 auto">
+    <div class="tabs">
+      <button class="tab on" data-t="request" onclick="st('request')">NEW REQUEST</button>
+      <button class="tab" data-t="payment" onclick="st('payment')">PAYMENT</button>
+      <button class="tab" data-t="track" onclick="st('track')">TRACK STATUS</button>
+    </div>
+
+    <!-- NEW REQUEST TAB -->
+    <div id="t-request">
+      <div class="card glow">
+        <div class="sm ls tr mb" style="margin-bottom:18px">◈ INITIATE BAN SEQUENCE</div>
+        <div class="fg">
+          <label class="lbl">TARGET NUMBER (WITH COUNTRY CODE)</label>
+          <input class="inp" id="u-num" type="tel" placeholder="+2349127757212"/>
+          <div class="td sm mt" style="margin-top:5px;font-size:10px">Include + and country code: +234… +1… +27…</div>
+        </div>
+        <div class="fg">
+          <label class="lbl">REASON <span class="td">(optional)</span></label>
+          <input class="inp" id="u-reason" placeholder="Spam, Scam, Harassment..."/>
+        </div>
+        <button class="btn btn-r w100" id="submit-btn" onclick="doSubmit()">⚡ GENERATE REQUEST ID</button>
+      </div>
+      <div id="r-result" style="display:none;margin-top:14px">
+        <div class="card" style="text-align:center">
+          <div class="sm ls tr mb" style="margin-bottom:12px">✅ REQUEST CREATED</div>
+          <div class="td sm mb" style="margin-bottom:7px">YOUR REQUEST ID — TAP TO COPY</div>
+          <div class="idbox mb" id="r-id" style="margin-bottom:14px" onclick="copyId()">—</div>
+          <div class="td" style="font-size:10px;line-height:1.7">Save this ID. You need it for payment and tracking. We'll notify you of every status update.</div>
+          <button class="btn btn-c w100 mt" style="margin-top:14px" onclick="st('payment')">PROCEED TO PAYMENT →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAYMENT TAB -->
+    <div id="t-payment" style="display:none">
+      <div class="card glow">
+        <div class="sm ls tr mb" style="margin-bottom:18px">◈ PAYMENT INSTRUCTIONS</div>
+        <div style="text-align:center;margin-bottom:22px">
+          <div style="font-size:44px;font-weight:900;color:var(--c);text-shadow:var(--cg)">₦1,000</div>
+          <div class="td sm ls">PER BAN REQUEST</div>
+        </div>
+        <div class="pline"><span>BANK</span><strong id="p-bank">Loading...</strong></div>
+        <div class="pline"><span>ACCOUNT NAME</span><strong id="p-name">Loading...</strong></div>
+        <div class="pline"><span>ACCOUNT NUMBER</span><strong id="p-acct" style="color:var(--c);letter-spacing:2px">Loading...</strong></div>
+        <div class="pline"><span>AMOUNT</span><strong style="color:var(--c)">₦1,000.00</strong></div>
+        <div class="card mt" style="margin-top:12px;background:rgba(255,170,0,.05);border-color:rgba(255,170,0,.25)">
+          <div style="color:#ffaa00;font-size:10px;letter-spacing:1px;margin-bottom:5px">⚠ USE YOUR REQUEST ID AS NARRATION</div>
+          <div class="td" style="font-size:11px;line-height:1.7">Transfer ₦1,000 and use your Request ID as the transfer narration/reference. Send receipt to admin WhatsApp for faster processing.</div>
+        </div>
+        <div class="fg mt" style="margin-top:16px">
+          <label class="lbl">YOUR REQUEST ID</label>
+          <input class="inp" id="p-req-id" placeholder="BNX-XXXXXX-XXXX"/>
+        </div>
+        <button class="btn btn-r w100" onclick="doPayNotify()">✅ I'VE PAID — NOTIFY ADMIN</button>
+        <div class="td sm mt" style="margin-top:10px;font-size:10px;text-align:center">After paying, go to <strong style="color:var(--c)">Track Status</strong> to monitor your request live.</div>
+      </div>
+    </div>
+
+    <!-- TRACK TAB -->
+    <div id="t-track" style="display:none">
+      <div class="card glow">
+        <div class="sm ls tr mb" style="margin-bottom:18px">◈ TRACK YOUR REQUEST</div>
+        <div class="fg">
+          <label class="lbl">REQUEST ID</label>
+          <input class="inp" id="t-id" placeholder="BNX-XXXXXX-XXXX"/>
+        </div>
+        <div class="flex fgap">
+          <button class="btn btn-r w100" onclick="doTrack(true)">🔍 CHECK STATUS</button>
+          <button class="btn btn-g" id="monitor-btn" onclick="toggleMonitor()" title="Auto-refresh every 5s" style="white-space:nowrap;padding:13px 16px">📡 MONITOR</button>
+        </div>
+      </div>
+      <!-- LIVE MONITOR BAR (shown when monitoring) -->
+      <div id="monitor-bar" class="monitor-bar mt" style="display:none">
+        <div class="monitor-left"><div class="live-dot"></div><span>LIVE MONITORING — refreshes every 5s</span></div>
+        <button class="btn btn-g" style="font-size:10px;padding:5px 10px" onclick="toggleMonitor()">STOP</button>
+      </div>
+      <div id="track-result" style="display:none;margin-top:14px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ADMIN ══ -->
+<div class="page" id="p-admin">
+  <!-- LOGIN -->
+  <div id="a-login" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px">
+    <div class="card glow" style="width:100%;max-width:340px;text-align:center">
+      <div class="tr fw9 ls" style="font-size:24px;margin-bottom:4px;text-shadow:var(--glow)">BANX</div>
+      <div class="td sm ls mb" style="margin-bottom:30px;letter-spacing:3px">ADMIN TERMINAL</div>
+      <div class="fg" style="text-align:left">
+        <label class="lbl">ACCESS CODE</label>
+        <input class="inp" id="a-pwd" type="password" placeholder="••••••••••••" onkeydown="if(event.key==='Enter')aLogin()"/>
+      </div>
+      <button class="btn btn-r w100" onclick="aLogin()">⚡ AUTHENTICATE</button>
+      <div id="a-err" style="display:none;color:var(--r);font-size:11px;margin-top:12px;letter-spacing:1px"></div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="a-dash" style="display:none">
+    <div class="a-hdr" style="margin-top:60px">
+      <div><div class="tr fw9 ls">ADMIN DASHBOARD</div><div class="td sm" id="a-clock"></div></div>
+      <div class="flex fgap">
+        <button class="btn btn-g sm" style="font-size:11px;padding:8px 14px" onclick="openModal()">+ ADD</button>
+        <button class="btn btn-g sm" style="font-size:11px;padding:8px 14px" onclick="aLogout()">LOGOUT</button>
+      </div>
+    </div>
+    <div class="flex fgap" style="padding:14px 18px;flex-wrap:wrap">
+      <div class="astat"><div class="astat-v tr" id="as-t">0</div><div class="astat-l">TOTAL</div></div>
+      <div class="astat"><div class="astat-v" style="color:#0096ff" id="as-p">0</div><div class="astat-l">PENDING PAY</div></div>
+      <div class="astat"><div class="astat-v" style="color:#ffaa00" id="as-q">0</div><div class="astat-l">IN QUEUE</div></div>
+      <div class="astat"><div class="astat-v" style="color:#00ff66" id="as-b">0</div><div class="astat-l">BANNED</div></div>
+    </div>
+    <div class="tabs" style="padding:0 18px">
+      <button class="tab on" data-f="all" onclick="af('all')">ALL</button>
+      <button class="tab" data-f="payment_pending" onclick="af('payment_pending')">PENDING PAY</button>
+      <button class="tab" data-f="ban_pending" onclick="af('ban_pending')">APPROVED</button>
+      <button class="tab" data-f="banned" onclick="af('banned')">BANNED</button>
+      <button class="tab" data-f="rejected" onclick="af('rejected')">REJECTED</button>
+    </div>
+    <div style="padding:0 18px 100px;overflow-x:auto">
+      <div id="a-tbl"><div class="lbox"><div class="sp"></div>LOADING...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD MODAL -->
+<div id="modal">
+  <div class="card glow" style="width:100%;max-width:380px">
+    <div class="tr ls fw9 mb" style="margin-bottom:18px">◈ ADD REQUEST</div>
+    <div class="fg"><label class="lbl">REQUEST ID (BLANK = AUTO)</label><input class="inp" id="m-id" placeholder="auto-generate"/></div>
+    <div class="fg"><label class="lbl">TARGET NUMBER *</label><input class="inp" id="m-num" placeholder="+2349127757212"/></div>
+    <div class="fg"><label class="lbl">REASON</label><input class="inp" id="m-rsn" placeholder="Spam, Scam..."/></div>
+    <div class="fg"><label class="lbl">STATUS</label>
+      <select class="inp" id="m-st">
+        <option value="payment_pending">Pending Payment</option>
+        <option value="ban_pending">Approved — In Queue</option>
+        <option value="banned">Banned</option>
+      </select>
+    </div>
+    <div class="flex fgap">
+      <button class="btn btn-g" style="flex:1" onclick="closeModal()">CANCEL</button>
+      <button class="btn btn-r" style="flex:1" onclick="doAdd()">SAVE</button>
+    </div>
+  </div>
+</div>
+
+<button class="fab" onclick="go('user')" title="New Request">⚡</button>
+
+<script>
+let adminKey='', reqs=[], filter='all', pollTimer=null;
+let trackPoller=null, monitorActive=false, lastStatus=null, lastTrackedId=null;
+
+/* ── API ── */
+async function api(path, opts={}) {
+  const r = await fetch(path, {
+    headers: {'Content-Type':'application/json','x-admin-key':adminKey},
+    ...opts,
+    body: opts.body ? JSON.stringify(opts.body) : undefined
+  });
+  if (!r.ok) throw new Error((await r.json()).error || r.status);
+  return r.json();
+}
+
+function $(id){ return document.getElementById(id); }
+
+/* ── INIT ── */
+async function init() {
+  try {
+    const c = await api('/api/config');
+    $('p-bank').textContent = c.bank;
+    $('p-name').textContent = c.name;
+    $('p-acct').textContent = c.acct;
+  } catch(_) {}
+  loadStats(); setInterval(loadStats, 15000);
+  setInterval(clock, 1000); clock();
+  try {
+    const s = JSON.parse(localStorage.getItem('banx') || '{}');
+    if (s.id) { $('p-req-id').value = s.id; $('t-id').value = s.id; }
+  } catch(_) {}
+  // Request browser notification permission
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+async function loadStats() {
+  try {
+    const s = await api('/api/stats');
+    $('s-total').textContent   = s.total;
+    $('s-pending').textContent = s.pending;
+    $('s-banned').textContent  = s.banned;
+  } catch(_) {}
+}
+
+function clock() { const el=$('a-clock'); if(el) el.textContent=new Date().toLocaleString(); }
+
+/* ── ROUTING ── */
+function go(p) {
+  document.querySelectorAll('.page').forEach(x => x.classList.remove('on'));
+  $('p-'+p).classList.add('on');
+  document.querySelectorAll('.nb').forEach(b => b.classList.toggle('on', b.dataset.p===p));
+  if (p !== 'track') stopMonitor();
+  if (p === 'admin') { adminKey ? showDash() : showLogin(); }
+  window.scrollTo(0,0);
+}
+
+function st(n) {
+  ['request','payment','track'].forEach(t => {
+    $('t-'+t).style.display = t===n ? 'block' : 'none';
+    document.querySelector(`[data-t="${t}"]`)?.classList.toggle('on', t===n);
+  });
+  if (n !== 'track') stopMonitor();
+}
+
+/* ── TOAST ── */
+function toast(msg, type) {
+  const el = $('toast');
+  el.innerHTML = msg; el.className = 'on ' + (type||'er');
+  clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('on'), 5000);
+}
+
+/* ── NOTIFICATION BANNER ── */
+function showBanner(msg, type) {
+  const b=$('notif-banner'), m=$('notif-msg');
+  m.textContent = msg;
+  b.className = 'on ' + (type||'ok');
+  clearTimeout(b._t);
+  b._t = setTimeout(() => b.classList.remove('on'), 10000);
+}
+function closeBanner() { $('notif-banner').classList.remove('on'); }
+
+/* ── BROWSER NOTIFICATION ── */
+function pushNotif(title, body) {
+  try {
+    if (Notification.permission === 'granted') {
+      new Notification(title, { body, icon: '' });
+    }
+  } catch(_) {}
+}
+
+function copyId() {
+  const id = $('r-id').textContent;
+  navigator.clipboard?.writeText(id).then(() => toast('📋 Copied! '+id,'ok'));
+}
+function norm(n){ return n.replace(/[\s\-\(\)]/g,'').trim(); }
+function save(obj){ try{ localStorage.setItem('banx',JSON.stringify({...JSON.parse(localStorage.getItem('banx')||'{}'),...obj})); }catch(_){} }
+function ts(ms){ return ms ? new Date(ms).toLocaleString() : ''; }
+
+/* ── USER: SUBMIT ── */
+async function doSubmit() {
+  const num = norm($('u-num').value), reason = $('u-reason').value;
+  if (!num || num.replace(/\D/g,'').length < 7) return toast('Enter a valid number with country code');
+  const btn = $('submit-btn'); btn.disabled=true; btn.textContent='CREATING...';
+  try {
+    const r = await api('/api/requests', {method:'POST', body:{number:num, reason}});
+    $('r-id').textContent = r.id;
+    $('r-result').style.display = 'block';
+    $('p-req-id').value = r.id;
+    $('t-id').value = r.id;
+    save({id: r.id});
+    toast('✅ Request ID generated! Tap to copy.','ok');
+    $('r-result').scrollIntoView({behavior:'smooth'});
+  } catch(e) { toast('Error: '+e.message); }
+  btn.disabled=false; btn.textContent='⚡ GENERATE REQUEST ID';
+}
+
+/* ── USER: PAY NOTIFY ── */
+async function doPayNotify() {
+  const id = $('p-req-id').value.trim();
+  if (!id.startsWith('BNX-')) return toast('Enter a valid Request ID');
+  try {
+    await api('/api/requests/'+id+'/notify-payment', {method:'POST'});
+    toast('✅ Admin notified! Switch to Track Status to monitor live.','ok');
+    $('t-id').value = id;
+    setTimeout(() => { st('track'); doTrack(true); }, 1400);
+  } catch(e) { toast('Error: '+e.message); }
+}
+
+/* ── USER: TRACK ── */
+async function doTrack(startPoll) {
+  const id = $('t-id').value.trim();
+  if (!id) return toast('Enter your Request ID');
+  lastTrackedId = id;
+  const box = $('track-result');
+  box.style.display = 'block';
+  if (!box.innerHTML.includes('card glow')) {
+    box.innerHTML = '<div class="lbox"><div class="sp"></div>SEARCHING...</div>';
+  }
+  try {
+    const r = await api('/api/requests/'+id);
+    // ── Status change detection ──
+    if (lastStatus !== null && lastStatus !== r.status) {
+      onStatusChange(lastStatus, r.status, r);
+    }
+    lastStatus = r.status;
+    renderTrackResult(r, id, box);
+  } catch(e) {
+    box.innerHTML = `<div class="card"><div class="empty">${e.message==='Not found'?'❌ REQUEST NOT FOUND<br><span class="td sm">Check your ID or contact admin</span>':'⚠ ERROR: '+e.message}</div></div>`;
+  }
+  if (startPoll && !monitorActive) startMonitor();
+}
+
+function onStatusChange(prev, next, r) {
+  if (next === 'ban_pending') {
+    const msg = '✅ PAYMENT APPROVED — Your request is now in the ban queue!';
+    showBanner(msg, 'ok');
+    toast(msg, 'ok');
+    pushNotif('BANX — Payment Approved ✅', 'Your ban request is now in the queue. Standby...');
+  } else if (next === 'banned') {
+    const msg = '💀 BAN CONFIRMED — Target account has been terminated!';
+    showBanner(msg, 'ban');
+    toast(msg, 'er');
+    pushNotif('BANX — Ban Confirmed 💀', 'The target account has been successfully terminated.');
+  } else if (next === 'rejected') {
+    showBanner('❌ Request rejected. Contact admin for details.', 'ban');
+    toast('❌ Request was rejected by admin.', 'er');
+  }
+}
+
+function renderTrackResult(r, id, box) {
+  const SM = {
+    payment_pending: {l:'PENDING PAYMENT', c:'b-pay', i:'💳'},
+    ban_pending:     {l:'APPROVED — IN QUEUE', c:'b-q', i:'✅'},
+    banned:          {l:'💀 BANNED', c:'b-ban', i:''},
+    rejected:        {l:'REJECTED', c:'b-rej', i:'❌'},
+  };
+  const s = SM[r.status] || SM.payment_pending;
+  const steps = [
+    {l:'Request Created',    st:'done', ts: r.createdAt},
+    {l:'Payment Approved',   st:['ban_pending','banned'].includes(r.status)?'done':r.status==='payment_pending'?'act':'pend', ts: r.approvedAt},
+    {l:'Ban Initiated',      st:r.status==='banned'?'done':r.status==='ban_pending'?'act':'pend', ts: null},
+    {l:'Account Terminated', st:r.status==='banned'?'done':'pend', ts: r.bannedAt},
+  ];
+  box.innerHTML = `<div class="card glow">
+    <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div class="tc fw9" style="font-size:15px">${r.number||'—'}</div>
+      <span class="bdg ${s.c}">${s.i} ${s.l}</span>
+    </div>
+    <div class="idbox mb" style="margin-bottom:14px;font-size:10px">${id}</div>
+    <div style="margin-bottom:14px">
+      ${steps.map(x=>`
+        <div class="sstep ${x.st}">
+          <div class="sdot"></div>
+          <span class="sm ls">${x.l}</span>
+          ${x.st==='done'?'<span style="margin-left:4px;font-size:12px">✓</span>':''}
+          ${x.ts?`<span class="sstep-ts">${ts(x.ts)}</span>`:''}
+        </div>`).join('')}
+    </div>
+    ${r.status==='payment_pending'?`
+      <div class="card" style="background:rgba(0,150,255,.05);border-color:rgba(0,150,255,.2);font-size:11px;color:#0096ff">
+        💳 Awaiting payment confirmation from admin. Make sure you've paid and notified admin.
+      </div>`:''
+    }
+    ${r.status==='ban_pending'?`
+      <div class="card" style="background:rgba(255,170,0,.06);border-color:rgba(255,170,0,.25);font-size:11px;color:#ffaa00">
+        ✅ Payment confirmed. Your target is queued for ban. Stay monitored for the final confirmation.
+      </div>`:''
+    }
+    ${r.status==='banned'?`
+      <div class="card mt" style="text-align:center;border-color:var(--r);background:rgba(255,0,51,.06)">
+        <div style="font-size:36px">💀</div>
+        <div class="tr fw9 ls mt" style="margin-top:8px">TARGET ELIMINATED</div>
+        <div class="td sm mt" style="margin-top:4px">${ts(r.bannedAt)}</div>
+      </div>`:''
+    }
+  </div>`;
+}
+
+/* ── LIVE MONITOR ── */
+function startMonitor() {
+  monitorActive = true;
+  $('monitor-bar').style.display = 'flex';
+  $('monitor-btn').textContent = '🔴 MONITORING';
+  $('monitor-btn').style.borderColor = '#00ff66';
+  $('monitor-btn').style.color = '#00ff66';
+  clearInterval(trackPoller);
+  trackPoller = setInterval(() => {
+    if (lastTrackedId) doTrack(false);
+  }, 5000);
+}
+
+function stopMonitor() {
+  monitorActive = false;
+  clearInterval(trackPoller); trackPoller = null;
+  $('monitor-bar').style.display = 'none';
+  const btn = $('monitor-btn');
+  if (btn) { btn.textContent='📡 MONITOR'; btn.style.borderColor=''; btn.style.color=''; }
+}
+
+function toggleMonitor() {
+  if (monitorActive) stopMonitor();
+  else { if ($('t-id').value.trim()) startMonitor(); else toast('Enter a Request ID first'); }
+}
+
+/* ── ADMIN AUTH ── */
+async function aLogin() {
+  const pwd = $('a-pwd').value;
+  try {
+    await api('/api/admin/verify', {method:'POST', body:{password:pwd}});
+    adminKey = pwd; $('a-pwd').value = ''; showDash();
+  } catch(_) {
+    const e=$('a-err'); e.textContent='⚠ INVALID ACCESS CODE'; e.style.display='block';
+    $('a-pwd').value=''; setTimeout(()=>e.style.display='none',3000);
+  }
+}
+function aLogout() { adminKey=''; clearInterval(pollTimer); showLogin(); }
+function showLogin() { $('a-login').style.display='flex'; $('a-dash').style.display='none'; }
+function showDash()  { $('a-login').style.display='none'; $('a-dash').style.display='block'; loadAdmin(); startAdminPoll(); }
+
+/* ── ADMIN: LOAD ── */
+async function loadAdmin() {
+  try { reqs = await api('/api/admin/requests'); renderTable(); updateStats(); }
+  catch(e) { $('a-tbl').innerHTML='<div class="empty">⚠ '+e.message+'</div>'; }
+}
+function startAdminPoll() { clearInterval(pollTimer); pollTimer=setInterval(loadAdmin,6000); }
+
+function updateStats() {
+  $('as-t').textContent = reqs.length;
+  $('as-p').textContent = reqs.filter(r=>r.status==='payment_pending').length;
+  $('as-q').textContent = reqs.filter(r=>r.status==='ban_pending').length;
+  $('as-b').textContent = reqs.filter(r=>r.status==='banned').length;
+  $('s-total').textContent   = reqs.length;
+  $('s-pending').textContent = reqs.filter(r=>r.status!=='banned').length;
+  $('s-banned').textContent  = reqs.filter(r=>r.status==='banned').length;
+}
+
+function af(f) {
+  filter=f;
+  document.querySelectorAll('[data-f]').forEach(b=>b.classList.toggle('on',b.dataset.f===f));
+  renderTable();
+}
+
+const BDG = {
+  payment_pending: '<span class="bdg b-pay">💳 PENDING PAYMENT</span>',
+  ban_pending:     '<span class="bdg b-q">✅ APPROVED — QUEUE</span>',
+  banned:          '<span class="bdg b-ban">💀 BANNED</span>',
+  rejected:        '<span class="bdg b-rej">REJECTED</span>',
+};
+
+function renderTable() {
+  const list = filter==='all' ? reqs : reqs.filter(r=>r.status===filter);
+  const wrap = $('a-tbl');
+  if (!list.length) { wrap.innerHTML='<div class="empty">NO RECORDS</div>'; return; }
+  wrap.innerHTML = `<table class="tbl">
+    <thead><tr><th>ID</th><th>NUMBER</th><th>REASON</th><th>STATUS</th><th>ACTIONS</th></tr></thead>
+    <tbody>${list.map(r=>`
+      <tr class="${r.payNotified && r.status==='payment_pending' ? 'pay-notif-row':''}">
+        <td style="font-size:9px;color:var(--dim)">
+          ${r.id}
+          ${r.payNotified?'<span title="User notified admin of payment" style="color:#ffaa00"> 💰</span>':''}
+        </td>
+        <td class="tc fw9">${r.number||'—'}</td>
+        <td class="td sm">${r.reason||'—'}</td>
+        <td>
+          ${BDG[r.status]||r.status}
+          ${r.approvedAt?`<div style="font-size:9px;color:var(--dim);margin-top:3px">✅ ${ts(r.approvedAt)}</div>`:''}
+          ${r.bannedAt?`<div style="font-size:9px;color:var(--dim);margin-top:3px">💀 ${ts(r.bannedAt)}</div>`:''}
+        </td>
+        <td>
+          <div class="act-row">
+            ${r.status==='payment_pending'?`
+              <button class="btn btn-ok" style="font-size:10px;padding:6px 10px;letter-spacing:.5px" onclick="approvePayment('${r.id}')">
+                ✅ APPROVE PAYMENT
+              </button>`:''
+            }
+            ${r.status==='ban_pending'?`
+              <button class="btn btn-danger" style="font-size:10px;padding:6px 10px;letter-spacing:.5px" onclick="executeBan('${r.id}')">
+                💀 EXECUTE BAN
+              </button>`:''
+            }
+            ${!['rejected','banned'].includes(r.status)?`
+              <button class="btn btn-g" style="font-size:10px;padding:6px 8px;color:#555" onclick="upd('${r.id}','rejected')" title="Reject">
+                ✗ REJECT
+              </button>`:''
+            }
+            <button class="btn btn-g" style="font-size:10px;padding:6px 8px;color:#333" onclick="del('${r.id}')" title="Delete">🗑</button>
+          </div>
+        </td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+/* ── ADMIN ACTIONS ── */
+async function approvePayment(id) {
+  try {
+    await api('/api/admin/requests/'+id, {method:'PATCH', body:{status:'ban_pending'}});
+    toast('✅ Payment approved — request moved to queue', 'ok');
+    loadAdmin();
+  } catch(e) { toast('Error: '+e.message); }
+}
+
+async function executeBan(id) {
+  if (!confirm('Mark this number as BANNED?')) return;
+  try {
+    await api('/api/admin/requests/'+id, {method:'PATCH', body:{status:'banned'}});
+    toast('💀 Ban executed — user will be notified', 'ok');
+    loadAdmin();
+  } catch(e) { toast('Error: '+e.message); }
+}
+
+async function upd(id, status) {
+  try { await api('/api/admin/requests/'+id, {method:'PATCH', body:{status}}); toast('Updated','ok'); loadAdmin(); }
+  catch(e) { toast('Error: '+e.message); }
+}
+
+async function del(id) {
+  if (!confirm('Delete request '+id+'?')) return;
+  try { await api('/api/admin/requests/'+id, {method:'DELETE'}); toast('Deleted','ok'); loadAdmin(); }
+  catch(e) { toast('Error: '+e.message); }
+}
+
+/* ── MODAL ── */
+function openModal()  { $('modal').classList.add('on'); }
+function closeModal() { $('modal').classList.remove('on'); }
+
+async function doAdd() {
+  const num = norm($('m-num').value);
+  if (!num || num.replace(/\D/g,'').length<7) return toast('Enter target number');
+  try {
+    await api('/api/admin/requests', {method:'POST', body:{
+      id: $('m-id').value.trim() || undefined,
+      number: num,
+      reason: $('m-rsn').value || '—',
+      status: $('m-st').value,
+    }});
+    toast('Request added','ok');
+    closeModal();
+    ['m-id','m-num','m-rsn'].forEach(f=>$(f).value='');
+    loadAdmin();
+  } catch(e) { toast('Error: '+e.message); }
+}
+
+$('modal').addEventListener('click', e=>{ if(e.target===$('modal')) closeModal(); });
+
+init();
+</script>
+</body></html>
